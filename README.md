@@ -20,14 +20,14 @@ React用のbabelのプリセットをインストール
 npm install --save babel-preset-react
 ```
 
-## browserify
+### browserify
 複数のjavascriptファイルの依存関係を克服して1つのjavascriptファイルにまとめてくれる。
 
 ```
 npm install --save-dev browserify
 ```
 
-## vinyl-source-stream
+### vinyl-source-stream
 browserifyのbundle()で吐き出されたオブジェクトがvinylではないのでvinylに変換しなければならない。
 gulpはvinylオブジェクトをイジイジしてファイルを書き出しているので、その過程でvinylオブジェクトが存在しなければならない。
 そのため、このパッケージをインストールする必要がある。

@@ -117,15 +117,23 @@ gulp.task("js", function(callback) {
 
 gulp.task("browserify", function(callback) {
   console.log("---------- babel-browserify ----------");
-  return browserify(src.js + "script.js", { debug: true })
+  return browserify(src.js + "main.js", { debug: true })
   .transform("babelify", {presets: ["es2015", "react"]})
-  .bundle()
+  .bundle(function(err){
+    if(err){
+      //エラー時でもgulpのwatchタスクを終了させない措置
+      return callback(err)
+    }
+  })
   .on('error', function(err){
     //jsの記法でエラーがあればログを吐き出す
     console.log("JSのエラー："　+ err.message);
     console.log(err.stack);
   })
-  .pipe(source('script.js'))
+  .pipe(source('main.js')) 
+  .pipe(plumber({
+    errorHandler: notify.onError("Error: <%= error.message %>")
+  }))
   .pipe(gulp.dest(dest.js));
 });
 
