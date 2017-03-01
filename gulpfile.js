@@ -13,6 +13,9 @@ var spritesmith = require("gulp.spritesmith");
 //js
 var concat = require("gulp-concat");
 var uglify = require("gulp-uglify");
+//ES2015
+var source = require('vinyl-source-stream');
+var browserify = require("browserify");
 
 //画像
 var imagemin = require("gulp-imagemin");
@@ -66,6 +69,7 @@ gulp.task("ejs", function() {
     errorHandler: notify.onError("Error: <%= error.message %>")
   }))
   .pipe(ejs('', {"ext": ".html"}))
+  .pipe(rename("index.html"))
   .pipe(gulp.dest(destPath))
   .pipe(browserSync.reload({stream:true}));
 });
@@ -108,21 +112,26 @@ js
 ------------------------ */
 gulp.task("js", function(callback) {
   console.log("---------- jsをスマートに ----------");
-  return runSequence("js-concat","js-min",callback);
+  return runSequence("browserify","js-min",callback);
 });
 
-//結合
-gulp.task("js-concat", function() {
-  gulp.src(src.js + "**/*.js")
-  .pipe(plumber({
-    errorHandler: notify.onError("Error: <%= error.message %>")
-  }))
-  .pipe(concat("script.js"))
+gulp.task("browserify", function(callback) {
+  console.log("---------- babel-browserify ----------");
+  return browserify(src.js + "script.js", { debug: true })
+  .transform("babelify", {presets: ["es2015", "react"]})
+  .bundle()
+  .on('error', function(err){
+    //jsの記法でエラーがあればログを吐き出す
+    console.log("JSのエラー："　+ err.message);
+    console.log(err.stack);
+  })
+  .pipe(source('script.js'))
   .pipe(gulp.dest(dest.js));
 });
 
 //圧縮
 gulp.task("js-min", function() {
+  console.log("---------- js圧縮 ----------");
   gulp.src(dest.js + "**/*.js")
   .pipe(plumber({
     errorHandler: notify.onError("Error: <%= error.message %>")
@@ -132,7 +141,6 @@ gulp.task("js-min", function() {
   .pipe(gulp.dest(dest.jsmin))
   .pipe(browserSync.reload({stream:true}));
 });
-
 
 /* ------------------------
 img
@@ -199,7 +207,7 @@ gulp.task("watch", function(){
 });
 
 //ローカルサーバー
-gulp.task("server", function(){
+gulp.task("browser-sync", function(){
   browserSync({
     server: {
       baseDir: "./",
@@ -209,4 +217,4 @@ gulp.task("server", function(){
   });
 });
 
-gulp.task("default",["ejs","sass","js","imagemin","sprite","watch","server"]);
+gulp.task("default",["ejs","sass","js","imagemin","sprite","watch","browser-sync"]);
