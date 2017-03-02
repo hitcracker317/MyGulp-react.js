@@ -130,7 +130,7 @@ gulp.task("browserify", function(callback) {
     console.log("JSのエラー："　+ err.message);
     console.log(err.stack);
   })
-  .pipe(source('main.js')) 
+  .pipe(source('main.js'))
   .pipe(plumber({
     errorHandler: notify.onError("Error: <%= error.message %>")
   }))
